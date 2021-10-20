@@ -23,7 +23,7 @@ const ingredientReducer = (currentIngredients, action) => {
 
 const Ingredients = () => {
   const [ingredients, dispatch] = useReducer(ingredientReducer, []);
-  const {isLoading, data, error, sendRequest} = useHttp();
+  const {isLoading, data, error, reqExtra, reqIdentifier, sendRequest} = useHttp();
   // const [ ingredients, setIngredients ] = useState([]);
   // const [ isLoading, setIsLoading ] = useState(false);
   // const [ error, setError ] = useState();
@@ -45,8 +45,15 @@ const Ingredients = () => {
   // },[]);
 
   useEffect(() => {
-    console.log('RENDERING INGREDIENTS', ingredients);
-  },[ingredients]);
+    if (!isLoading && !error && reqIdentifier === 'REMOVE_INGREDIENT') {
+      dispatch({type:'DELETE', id: reqExtra})
+    } else if (!isLoading && !error &&reqIdentifier === 'ADD_INGREDIENT') {
+      dispatch({
+        type: 'ADD',
+        ingredient: {id: data.name, ...reqExtra}
+      })
+    }
+  },[data, reqExtra, reqIdentifier, isLoading]);
 
   const filteredIngredientsHandler = useCallback(filteredIngredient => {
     // setIngredients(filteredIngredient);
@@ -54,6 +61,13 @@ const Ingredients = () => {
   }, []);
 
   const addIngredientHandler = useCallback(ingredient => {
+    sendRequest(
+      'https://practice-hooks-91596-default-rtdb.firebaseio.com/ingredients.json',
+      'POST',
+      JSON.stringify(ingredient),
+      ingredient,
+      'ADD_INGREDIENT'
+    )
     // dispatchHttp({type:'SEND'});
     // fetch('https://practice-hooks-91596-default-rtdb.firebaseio.com/ingredients.json', {
     //   method: 'POST',
@@ -76,8 +90,11 @@ const Ingredients = () => {
   const removeItemHandler = useCallback((id) => {
     sendRequest(
       `https://practice-hooks-91596-default-rtdb.firebaseio.com/ingredients/${id}.json`,
-      'DELETE'
-    )
+      'DELETE',
+      null,
+      id,
+      'REMOVE_INGREDIENT'
+    );
     // dispatchHttp({type:'SEND'})
     // fetch(`https://practice-hooks-91596-default-rtdb.firebaseio.com/ingredients/${id}.json`, {
     //   method: 'DELETE'
