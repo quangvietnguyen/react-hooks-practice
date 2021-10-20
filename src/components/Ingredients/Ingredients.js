@@ -19,11 +19,9 @@ const ingredientReducer = (currentIngredients, action) => {
   }
 };
 
-
-
 const Ingredients = () => {
   const [ingredients, dispatch] = useReducer(ingredientReducer, []);
-  const {isLoading, data, error, reqExtra, reqIdentifier, sendRequest} = useHttp();
+  const {isLoading, data, error, reqExtra, reqIdentifier, clear, sendRequest} = useHttp();
   // const [ ingredients, setIngredients ] = useState([]);
   // const [ isLoading, setIsLoading ] = useState(false);
   // const [ error, setError ] = useState();
@@ -53,7 +51,7 @@ const Ingredients = () => {
         ingredient: {id: data.name, ...reqExtra}
       })
     }
-  },[data, reqExtra, reqIdentifier, isLoading]);
+  },[data, reqExtra, reqIdentifier, isLoading, error]);
 
   const filteredIngredientsHandler = useCallback(filteredIngredient => {
     // setIngredients(filteredIngredient);
@@ -85,7 +83,7 @@ const Ingredients = () => {
     //     ingredient: {id: responseData.name, ...ingredient}
     //   })
     // });
-  },[]);
+  },[sendRequest]);
 
   const removeItemHandler = useCallback((id) => {
     sendRequest(
@@ -107,10 +105,6 @@ const Ingredients = () => {
     // })
   },[sendRequest]);
 
-  const clearError = useCallback(() => {
-    // dispatchHttp({type:'CLEAR'})
-  },[]);
-
   const ingredientList = useMemo(() => {
     return (
       <IngredientList 
@@ -122,7 +116,7 @@ const Ingredients = () => {
 
   return (
     <div className="App">
-      {error && <ErrorModal onClose={clearError}>{error}</ErrorModal>}
+      {error && <ErrorModal onClose={clear}>{error}</ErrorModal>}
       <IngredientForm 
         onAddIngredient={addIngredientHandler} 
         loading={isLoading}
